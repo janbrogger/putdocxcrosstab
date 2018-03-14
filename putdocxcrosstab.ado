@@ -6,8 +6,7 @@ program define putdocxcrosstab
 	version 15.1
 	syntax varlist(min=2 max=2) ,	[noROWSum] [noCOLSum] [TItle(string)] ///
 									[MIssing] [noFREQ] [row] [col] ///
-									[pformat(string)]
-	
+									[pformat(string)]	
 	capture putdocx describe
 	if _rc {
 		di in smcl as error "ERROR: No active docx."
@@ -38,8 +37,11 @@ program define putdocxcrosstab
 		local pformat "%3.0f"
 	}
 	
+	local shading1 "lightgray"
+	local shading2 ""
+	
 	tabulate `var1' `var2' , `missing'
-	local nrows=`r(r)'+1
+	local nrows=`r(r)'+2
 	local ncols=`r(c)'+1
 	
 	if "`rowsum'"!="norowsum" {
@@ -56,12 +58,17 @@ program define putdocxcrosstab
 	} 
 	
 	tempname mytable
-	putdocx table `mytable' = (`nrows', `ncols') , title("`title'") 
+	putdocx table `mytable' = (`nrows', `ncols')  , title(`"`title'"')
+	putdocx table `mytable'(1,1), shading(`shading1')
 	
+	//Add row variable name
+	putdocx table `mytable'(2,1) = (`"`varlab1'"'), halign(left) rowspan(2) 
+	putdocx table `mytable'(2,1), shading(`shading2')
+		
 	** Write out row headers
-	qui levelsof `var1' , local(levels1) `missing'
+	qui levelsof `var1' , local(levels1) `missing'	
 	local vallab1 : value label `var1'
-	local currentrow=3
+	local currentrow=4
 	local currentcol=1
 	foreach val1 in `levels1' {
 		if "`vallab1'"!="" {
@@ -71,14 +78,17 @@ program define putdocxcrosstab
 			local value1 `val1'
 		}
 				
-		putdocx table `mytable'(`currentrow',`currentcol') = (`"`value1'"'), halign(left)
+		putdocx table `mytable'(`currentrow',`currentcol') = (`"`value1'"'), halign(left) 
+		putdocx table `mytable'(`currentrow',`currentcol'), shading(`shading2')
 		local currentrow=`currentrow'+1
 	}
 	
 	** Write out column headers
 	qui levelsof `var2' , local(levels2) `missing'
+	putdocx table `mytable'(2,2) = (`"`varlab2'"'), halign(center) colspan(`r(r)') 
+	putdocx table `mytable'(2,2) , shading(`shading2')
 	local vallab2 : value label `var2'
-	local currentrow=2
+	local currentrow=3
 	local currentcol=2
 	foreach val2 in `levels2' {
 		if "`vallab2'"!="" {
@@ -88,7 +98,8 @@ program define putdocxcrosstab
 			local value2 `val2'
 		}
 				
-		putdocx table `mytable'(`currentrow',`currentcol') = (`"`value2'"'), halign(left)
+		putdocx table `mytable'(`currentrow',`currentcol') = (`"`value2'"'), halign(left) 
+		putdocx table `mytable'(`currentrow',`currentcol'), shading(`shading2')
 		local currentcol=`currentcol'+1		
 	}
 	
@@ -96,7 +107,7 @@ program define putdocxcrosstab
 	local sum = 0
 	qui levelsof `var2' , local(levels2) `missing'
 	local vallab2 : value label `var2'
-	local startrow=3
+	local startrow=4
 	local startcol=2
 	local currentrow=`startrow'
 	local currentcol=`startcol'	
@@ -141,7 +152,7 @@ program define putdocxcrosstab
 	** Write out row sums
 	if "`rowsum'"!="norowsum" {
 		qui levelsof `var1' , local(levels1) `missing'
-		local currentrow=3
+		local currentrow=4
 		local currentcol=`ncols'
 		foreach val1 in `levels1' {						
 			qui count if `var1'==`val1'	
@@ -167,10 +178,12 @@ program define putdocxcrosstab
 					local cell "`cell' (`rowpercf' %)"
 				}
 			}
-			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left)
+			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left) 
+			putdocx table `mytable'(`currentrow',`currentcol') ,  shading(`shading2')
 			local currentrow=`currentrow'+1
 		}
-		putdocx table `mytable'(2,`ncols') = ("Total"), halign(left)
+		putdocx table `mytable'(3,`ncols') = ("Total"), halign(left) 
+		putdocx table `mytable'(3,`ncols'), shading(`shading2')
 	}
 	
 	** Write out column sums
@@ -205,10 +218,12 @@ program define putdocxcrosstab
 				}
 			}
 			
-			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left)
+			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left) 
+			putdocx table `mytable'(`currentrow',`currentcol'),  shading(`shading2')
 			local currentcol=`currentcol'+1
 		}
-		putdocx table `mytable'(`currentrow',1) = ("Total"), halign(left)
+		putdocx table `mytable'(`currentrow',1) = ("Total"), halign(left) 
+		putdocx table `mytable'(`currentrow',1) , shading(`shading2')
 	}
 	
 	if "`colsum'"!="nocolsum" & "`rowsum'"!="norowsum" {
@@ -234,7 +249,8 @@ program define putdocxcrosstab
 					local cell "`cell' (`sumpercf'%)"
 				}
 			}
-		putdocx table `mytable'(`currentrow',`ncols') = ("`cell'"), halign(left)
+		putdocx table `mytable'(`currentrow',`ncols') = ("`cell'"), halign(left) 
+		putdocx table `mytable'(`currentrow',`ncols'), shading(`shading2')
 	}
 	
 end

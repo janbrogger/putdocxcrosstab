@@ -10,6 +10,7 @@ putdocx begin
 set tr off
 putdocxcrosstab pricecat  foreign
 
+
 putdocxcrosstab pricecat  foreign , norowsum 
 putdocxcrosstab pricecat  foreign , nocolsum
 putdocxcrosstab pricecat  foreign , norowsum nocolsum
