@@ -4,7 +4,9 @@
 capture program drop putdocxcrosstab
 program define putdocxcrosstab
 	version 15.1
-	syntax varlist(min=2 max=2) , [noROWSum] [noCOLSum] [TItle(string)] [MIssing] [noFREQ] [row] [col]
+	syntax varlist(min=2 max=2) ,	[noROWSum] [noCOLSum] [TItle(string)] ///
+									[MIssing] [noFREQ] [row] [col] ///
+									[pformat(string)]
 	
 	capture putdocx describe
 	if _rc {
@@ -30,6 +32,10 @@ program define putdocxcrosstab
 	if "`row'"!="" & "`col'"!="" {
 		di as err "Specify only one of row or column options"
 		error -1
+	}
+	
+	if "`pformat'"=="" {
+		local pformat "%3.0f"
 	}
 	
 	tabulate `var1' `var2' , `missing'
@@ -105,8 +111,8 @@ program define putdocxcrosstab
 			local sum=`sum'+`cellcount'
 			local rowperc=`cellcount'/`rowcount'*100
 			local colperc=`cellcount'/`colcount'*100
-			local rowpercf : di %3.1f `rowperc'
-			local colpercf : di %3.1f `colperc'
+			local rowpercf : di `pformat' `rowperc'
+			local colpercf : di `pformat' `colperc'
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
 					local cell "`rowpercf' %"
@@ -142,22 +148,22 @@ program define putdocxcrosstab
 			local rowcount=`r(N)'									
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
-					local rowpercf : di %3.1f 100
+					local rowpercf : di `pformat' 100
 					local cell "`rowpercf' %"
 				}
 				else if "`col'"=="col" {
-					local rowpercf : di %3.1f `rowcount'/`sum'*100
+					local rowpercf : di `pformat' `rowcount'/`sum'*100
 					local cell "`rowpercf' %"
 				}
 			}
 			else {
 				local cell "`rowcount'"
 				if "`row'"=="row" {
-					local rowpercf : di %3.1f 100
+					local rowpercf : di `pformat' 100
 					local cell "`cell' (`rowpercf'%)"
 				}
 				else if "`col'"=="col" {
-					local rowpercf : di %3.1f `rowcount'/`sum'*100
+					local rowpercf : di `pformat' `rowcount'/`sum'*100
 					local cell "`cell' (`rowpercf' %)"
 				}
 			}
@@ -179,22 +185,22 @@ program define putdocxcrosstab
 			
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
-					local colpercf : di %3.1f `colcount'/`sum'*100			
+					local colpercf : di `pformat' `colcount'/`sum'*100			
 					local cell "`colpercf' %"
 				}
 				else if "`col'"=="col" {
-					local colpercf : di %3.1f 100
+					local colpercf : di `pformat' 100
 					local cell "`colpercf' %"
 				}
 			}
 			else {
 				local cell "`r(N)'"
 				if "`row'"=="row" {
-					local colpercf : di %3.1f `colcount'/`sum'*100			
+					local colpercf : di `pformat' `colcount'/`sum'*100			
 					local cell "`cell' (`colpercf'%)"
 				}
 				else if "`col'"=="col" {
-					local colpercf : di %3.1f 100
+					local colpercf : di `pformat' 100
 					local cell "`cell' (`colpercf'%)"
 				}
 			}
@@ -210,7 +216,7 @@ program define putdocxcrosstab
 		qui count 
 		local totalcount= `r(N)'
 		local sumperc=`totalcount'/`sum'*100
-		local sumpercf : di %3.1f `sumperc'
+		local sumpercf : di `pformat' `sumperc'
 		if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
 					local cell "`sumpercf' %"

@@ -23,6 +23,9 @@
 {phang}noROWSum : drops the last column containing row sums{p_end}
 {phang}noCOLsum : drops the last row containing column sums{p_end}
 {phang}MIssing  : includes missing values{p_end}
+{phang}row  : gives percentages by row{p_end}
+{phang}col  : gives percentages by column{p_end}
+{phang}pformat  : numeric format for percentages{p_end}
 
 {marker example}
 {title:Example}
