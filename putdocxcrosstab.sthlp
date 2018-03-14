@@ -9,7 +9,7 @@
 {title:Syntax}
 
 {p 8 17 2}
-{cmdab:putdocxcrosstab} {varlist} , [noROWSum] [noCOLsum] [MIssing]
+{cmdab:putdocxcrosstab} {varlist} [if], [noROWSum] [noCOLsum] [MIssing]
 
 {marker description}
 {title:Description}

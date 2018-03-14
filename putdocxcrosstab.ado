@@ -4,7 +4,7 @@
 capture program drop putdocxcrosstab
 program define putdocxcrosstab
 	version 15.1
-	syntax varlist(min=2 max=2) ,	[noROWSum] [noCOLSum] [TItle(string)] ///
+	syntax varlist(min=2 max=2) [if],	[noROWSum] [noCOLSum] [TItle(string)] ///
 									[MIssing] [noFREQ] [row] [col] ///
 									[pformat(string)]	
 	capture putdocx describe
@@ -12,6 +12,12 @@ program define putdocxcrosstab
 		di in smcl as error "ERROR: No active docx."
 		exit = 119
 	}
+	
+	preserve
+	if `"`if'"'!=`""' {
+		keep `if'
+	}
+	
 	tokenize "`varlist'"
 	
 	local var1 "`1'"	
@@ -40,7 +46,7 @@ program define putdocxcrosstab
 	local shading1 "lightgray"
 	local shading2 ""
 	
-	tabulate `var1' `var2' , `missing'
+	tabulate `var1' `var2' , `missing' `row' `col' `freq'
 	local nrows=`r(r)'+2
 	local ncols=`r(c)'+1
 	
@@ -56,6 +62,20 @@ program define putdocxcrosstab
 		di as error "More than 63 columns are not allowed"
 		error -1
 	} 
+	
+	tempname var1num
+	capture confirm numeric variable `var1'	
+	if _rc!=0 {
+		encode `var1' , gen(`var1num')
+		local var1 "`var1num'"
+	}
+	
+	tempname var2num
+	capture confirm numeric variable `var2'	
+	if _rc!=0 {
+		encode `var2' , gen(`var2num')
+		local var2 "`var2num'"
+	}	
 	
 	tempname mytable
 	putdocx table `mytable' = (`nrows', `ncols')  , title(`"`title'"')
@@ -126,10 +146,10 @@ program define putdocxcrosstab
 			local colpercf : di `pformat' `colperc'
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
-					local cell "`rowpercf' %"
+					local cell "`rowpercf'%"
 				}
 				else if "`col'"=="col" {
-					local cell "`colpercf' %"
+					local cell "`colpercf'%"
 				}
 			}
 			else {
@@ -160,11 +180,11 @@ program define putdocxcrosstab
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
 					local rowpercf : di `pformat' 100
-					local cell "`rowpercf' %"
+					local cell "`rowpercf'%"
 				}
 				else if "`col'"=="col" {
 					local rowpercf : di `pformat' `rowcount'/`sum'*100
-					local cell "`rowpercf' %"
+					local cell "`rowpercf'%"
 				}
 			}
 			else {
@@ -175,7 +195,7 @@ program define putdocxcrosstab
 				}
 				else if "`col'"=="col" {
 					local rowpercf : di `pformat' `rowcount'/`sum'*100
-					local cell "`cell' (`rowpercf' %)"
+					local cell "`cell' (`rowpercf'%)"
 				}
 			}
 			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left) 
@@ -252,5 +272,6 @@ program define putdocxcrosstab
 		putdocx table `mytable'(`currentrow',`ncols') = ("`cell'"), halign(left) 
 		putdocx table `mytable'(`currentrow',`ncols'), shading(`shading2')
 	}
+	restore
 	
 end
