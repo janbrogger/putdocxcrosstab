@@ -10,15 +10,15 @@ putdocx begin
 set tr off
 putdocxcrosstab pricecat  foreign
 
-putdocxcrosstab pricecat  foreign , norows
-putdocxcrosstab pricecat  foreign , nocols
+putdocxcrosstab pricecat  foreign , norowsum 
+putdocxcrosstab pricecat  foreign , nocolsum
 putdocxcrosstab pricecat  foreign , norowsum nocolsum
 
 
-putdocxcrosstab pricecat  foreign , nofreq row
-
 putdocxcrosstab pricecat  foreign , row
 putdocxcrosstab pricecat  foreign , col
+putdocxcrosstab pricecat  foreign , row nofreq
+putdocxcrosstab pricecat  foreign , col nofreq
 
 shell taskkill /F /IM WinWord.exe
 tempfile doc

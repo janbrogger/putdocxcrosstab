@@ -139,29 +139,29 @@ program define putdocxcrosstab
 		local currentcol=`ncols'
 		foreach val1 in `levels1' {						
 			qui count if `var1'==`val1'	
-			local rowcount=`r(N)'
-			qui count 
-			local totalcount= `r(N)'
-			local rowperc=`rowcount'/`totalcount'*100
-			local rowpercf : di %3.1f `rowperc'
+			local rowcount=`r(N)'									
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
+					local rowpercf : di %3.1f 100
 					local cell "`rowpercf' %"
 				}
 				else if "`col'"=="col" {
-					local cell "`colpercf' %"
+					local rowpercf : di %3.1f `rowcount'/`sum'*100
+					local cell "`rowpercf' %"
 				}
 			}
 			else {
-				local cell "`r(N)'"
+				local cell "`rowcount'"
 				if "`row'"=="row" {
+					local rowpercf : di %3.1f 100
 					local cell "`cell' (`rowpercf'%)"
 				}
 				else if "`col'"=="col" {
-					local cell "`cell' (`colpercf'%)"
+					local rowpercf : di %3.1f `rowcount'/`sum'*100
+					local cell "`cell' (`rowpercf' %)"
 				}
 			}
-			putdocx table `mytable'(`currentrow',`currentcol') = ("`r(N)'"), halign(left)
+			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left)
 			local currentrow=`currentrow'+1
 		}
 		putdocx table `mytable'(2,`ncols') = ("Total"), halign(left)
@@ -175,30 +175,31 @@ program define putdocxcrosstab
 		foreach val2 in `levels2' {
 			qui count if `var2'==`val2'				
 			local colcount=`r(N)'
-			qui count 
-			local totalcount= `r(N)'
-			local colperc=`colcount'/`totalcount'*100
-			local colpercf : di %3.1f `colperc'
+			
 			
 			if "`freq'"=="nofreq" {
 				if "`row'"=="row" {
-					local cell "`rowpercf' %"
+					local colpercf : di %3.1f `colcount'/`sum'*100			
+					local cell "`colpercf' %"
 				}
 				else if "`col'"=="col" {
+					local colpercf : di %3.1f 100
 					local cell "`colpercf' %"
 				}
 			}
 			else {
 				local cell "`r(N)'"
 				if "`row'"=="row" {
-					local cell "`cell' (`rowpercf'%)"
+					local colpercf : di %3.1f `colcount'/`sum'*100			
+					local cell "`cell' (`colpercf'%)"
 				}
 				else if "`col'"=="col" {
+					local colpercf : di %3.1f 100
 					local cell "`cell' (`colpercf'%)"
 				}
 			}
 			
-			putdocx table `mytable'(`currentrow',`currentcol') = ("`r(N)'"), halign(left)
+			putdocx table `mytable'(`currentrow',`currentcol') = ("`cell'"), halign(left)
 			local currentcol=`currentcol'+1
 		}
 		putdocx table `mytable'(`currentrow',1) = ("Total"), halign(left)
